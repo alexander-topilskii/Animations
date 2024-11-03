@@ -15,9 +15,8 @@ data class FirstNodeParam(
 
 // Abstract Node class
 abstract class Node {
-
     val id: String = UUID.randomUUID().toString()
-    var label: String = ""
+    var label: String = id
     var isActive: Boolean = true
 
     // List of child nodes
