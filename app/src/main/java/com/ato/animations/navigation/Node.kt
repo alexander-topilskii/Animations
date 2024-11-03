@@ -7,15 +7,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import java.util.UUID
 
-abstract class Param
-
-data class FirstNodeParam(
-    val id: String
-): Param()
-
 // Abstract Node class
 abstract class Node {
-    val id: String = UUID.randomUUID().toString()
+    private val id: String = UUID.randomUUID().toString()
     var label: String = id
     var isActive: Boolean = true
 
@@ -96,7 +90,7 @@ object Graph {
             root?.findLastActiveNode()?.addChild(node)
         }
 
-        root?.printNodes()?: println("root is null")
+        root?.printNodes() ?: println("root is null")
     }
 
     fun getRootNode(): Node? {
