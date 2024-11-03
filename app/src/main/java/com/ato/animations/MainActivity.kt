@@ -13,10 +13,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ato.animations.navigation.Graph
+import com.ato.animations.navigation.Node
 import com.ato.animations.ui.theme.AnimationsTheme
 
 class MainActivity : ComponentActivity() {
@@ -45,20 +48,23 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.align(Alignment.BottomStart)
                         ) {
 
-                            Button({}) {
+                            Button({
+                                Graph.addNode(SecondScreen)
+                            }) {
                                 Text("1")
                             }
-                            Button({}) {
+                            Button({
+
+                            }) {
                                 Text("2")
                             }
-                            Button({}) {
+                            Button({
+
+                            }) {
                                 Text("3")
                             }
-
                         }
                     }
-
-
                 }
             }
         }

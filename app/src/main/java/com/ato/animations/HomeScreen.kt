@@ -17,3 +17,15 @@ data object HomeScreen : Node() {
         }
     }
 }
+
+data object SecondScreen : Node() {
+
+    @Composable
+    override fun Display(modifier: Modifier) {
+        Box(
+            modifier = modifier
+        ) {
+            Text("kek: 2")
+        }
+    }
+}
