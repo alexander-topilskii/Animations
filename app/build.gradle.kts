@@ -57,11 +57,4 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-
-    implementation(libs.voyager.navigator)
-    implementation(libs.voyager.screenmodel)
-    implementation(libs.voyager.bottom.sheet.navigator)
-    implementation(libs.voyager.tab.navigator)
-    implementation(libs.voyager.transitions)
-    implementation(libs.voyager.livedata)
 }
