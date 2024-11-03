@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.ato.animations.navigation.Node
 
-data object HomeScreen : Node() {
+class HomeScreen : Node() {
 
     @Composable
     override fun Display(modifier: Modifier) {
@@ -18,7 +18,7 @@ data object HomeScreen : Node() {
     }
 }
 
-data object SecondScreen : Node() {
+class SecondScreen() : Node() {
 
     @Composable
     override fun Display(modifier: Modifier) {
