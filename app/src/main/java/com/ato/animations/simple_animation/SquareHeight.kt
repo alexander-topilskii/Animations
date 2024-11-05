@@ -1,18 +1,28 @@
 package com.ato.animations.simple_animation
 
+import android.content.res.Configuration
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlowColumn
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,12 +32,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 
 @Composable
-@Preview
+@Preview(name = "Light Mode", showBackground = true)
+@Preview(name = "Dark Mode", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Preview(name = "Full Preview", showSystemUi = true)
 fun PreviewSquareHeightSample() {
     DisplaySquareHeightSample()
 }
@@ -35,7 +49,27 @@ fun PreviewSquareHeightSample() {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DisplaySquareHeightSample() {
-    var height by remember { mutableStateOf(150.dp) }
+    var expanded by remember { mutableStateOf(false) }
+    var text by remember { mutableStateOf("500") }
+
+    var fastOutSlowInEasing by remember { mutableStateOf(true) }
+    var linearOutSlowInEasing by remember { mutableStateOf(true) }
+    var fastOutLinearInEasing by remember { mutableStateOf(true) }
+
+    val easing: Easing = when {
+        fastOutSlowInEasing -> FastOutSlowInEasing
+        linearOutSlowInEasing -> LinearOutSlowInEasing
+        fastOutLinearInEasing -> FastOutLinearInEasing
+        else -> LinearEasing
+    }
+
+    val height: Dp by animateDpAsState(
+        targetValue = if (expanded) 200.dp else 100.dp,
+        animationSpec = tween(
+            durationMillis = text.toIntOrNull() ?: 500,
+            easing = easing
+        ), label = "height animation"
+    )
 
     Column(
         modifier = Modifier
@@ -56,16 +90,34 @@ fun DisplaySquareHeightSample() {
             ) { }
         }
 
-        FlowRow(
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = text,
+            onValueChange = { text = it },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            label = { Text("Speed: $text") }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        FlowColumn(
             modifier = Modifier.padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            TextCheckBox("fadeIn", false) { }
+            TextCheckBox("fastOutSlowInEasing", fastOutSlowInEasing) {
+                fastOutSlowInEasing = !fastOutSlowInEasing
+            }
+            TextCheckBox("linearOutSlowInEasing", linearOutSlowInEasing) {
+                linearOutSlowInEasing = !linearOutSlowInEasing
+            }
+            TextCheckBox("fastOutLinearInEasing", fastOutLinearInEasing) {
+                fastOutLinearInEasing = !fastOutLinearInEasing
+            }
         }
         Spacer(modifier = Modifier.height(24.dp))
 
         Button({
-
+            expanded = !expanded
         }) {
             Text("Change Invisible now: $height")
         }
