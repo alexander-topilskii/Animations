@@ -1,12 +1,16 @@
 package com.ato.animations.simple_animation
 
 import android.content.res.Configuration
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -53,22 +57,41 @@ fun DisplaySquareHeightSample() {
     var text by remember { mutableStateOf("500") }
 
     var fastOutSlowInEasing by remember { mutableStateOf(true) }
-    var linearOutSlowInEasing by remember { mutableStateOf(true) }
-    var fastOutLinearInEasing by remember { mutableStateOf(true) }
+    var linearOutSlowInEasing by remember { mutableStateOf(false) }
+    var fastOutLinearInEasing by remember { mutableStateOf(false) }
+    var stiffnessLow by remember { mutableStateOf(false) }
 
-    val easing: Easing = when {
-        fastOutSlowInEasing -> FastOutSlowInEasing
-        linearOutSlowInEasing -> LinearOutSlowInEasing
-        fastOutLinearInEasing -> FastOutLinearInEasing
-        else -> LinearEasing
+    val animationSpec = when {
+        fastOutSlowInEasing -> tween(
+            durationMillis = text.toIntOrNull() ?: 500,
+            easing = FastOutSlowInEasing
+        )
+
+        linearOutSlowInEasing -> tween(
+            durationMillis = text.toIntOrNull() ?: 500,
+            easing = LinearOutSlowInEasing
+        )
+
+        fastOutLinearInEasing -> tween(
+            durationMillis = text.toIntOrNull() ?: 500,
+            easing = FastOutLinearInEasing
+        )
+
+        stiffnessLow -> spring<Dp>(
+            dampingRatio = Spring.DampingRatioMediumBouncy,  // Controls how "bouncy" the spring is
+            stiffness = Spring.StiffnessVeryLow  // Lower stiffness means more springiness
+        )
+
+        else -> tween(
+            durationMillis = text.toIntOrNull() ?: 500,
+            easing = LinearEasing
+        )
     }
 
     val height: Dp by animateDpAsState(
-        targetValue = if (expanded) 200.dp else 100.dp,
-        animationSpec = tween(
-            durationMillis = text.toIntOrNull() ?: 500,
-            easing = easing
-        ), label = "height animation"
+        targetValue = if (expanded) 200.dp else 50.dp,
+        animationSpec = animationSpec,
+        label = "height animation"
     )
 
     Column(
@@ -112,6 +135,9 @@ fun DisplaySquareHeightSample() {
             }
             TextCheckBox("fastOutLinearInEasing", fastOutLinearInEasing) {
                 fastOutLinearInEasing = !fastOutLinearInEasing
+            }
+            TextCheckBox("stiffnessLow", stiffnessLow) {
+                stiffnessLow = !stiffnessLow
             }
         }
         Spacer(modifier = Modifier.height(24.dp))
