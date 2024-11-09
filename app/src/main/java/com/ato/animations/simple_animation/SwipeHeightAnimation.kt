@@ -9,6 +9,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,11 +34,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-
 
 @Composable
 @Preview(name = "Light Mode", showBackground = true)
@@ -50,7 +51,7 @@ fun PreviewSwipeHeightSample() {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DisplaySwipeHeightSample() {
-    var expanded by remember { mutableStateOf(false) }
+    var boxHeight by remember { mutableStateOf(100.dp) }
     var time by remember { mutableStateOf("500") }
     var stiffValue by remember { mutableStateOf("50") }
     var dumpValue by remember { mutableStateOf("0.5") }
@@ -77,8 +78,7 @@ fun DisplaySwipeHeightSample() {
         )
 
         stiffnessLow -> spring<Dp>(
-            dampingRatio = dumpValue.toFloatOrNull()
-                ?: 0.5f,  // Controls how "bouncy" the spring is
+            dampingRatio = dumpValue.toFloatOrNull() ?: 0.5f,
             stiffness = stiffValue.toFloatOrNull() ?: 50f
         )
 
@@ -88,97 +88,99 @@ fun DisplaySwipeHeightSample() {
         )
     }
 
-    val height: Dp by animateDpAsState(
-        targetValue = if (expanded) 200.dp else 50.dp,
+    val animatedHeight: Dp by animateDpAsState(
+        targetValue = boxHeight,
         animationSpec = animationSpec,
         label = "height animation"
     )
 
-    LazyColumn(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
     ) {
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .height(300.dp)
-            ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+        ) {
+            item {
                 Box(
                     modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .height(height)
-                        .width(150.dp)
-                        .background(Color.Red)
-                ) { }
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .height(300.dp)
+                        .pointerInput(Unit) {
+                            detectVerticalDragGestures { _, dragAmount ->
+                                boxHeight += if (dragAmount < 0) -10.dp else 10.dp
+                                if (boxHeight < 50.dp) boxHeight = 50.dp
+                                if (boxHeight > 500.dp) boxHeight = 500.dp
+                            }
+                        }
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .height(animatedHeight)
+                            .width(150.dp)
+                            .background(Color.Blue)
+                    )
+                }
             }
-        }
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-        item {
-            OutlinedTextField(
-                value = time,
-                onValueChange = { time = it },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                label = { Text("Speed: $time") }
-            )
-        }
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-        }
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            item {
+                OutlinedTextField(
+                    value = time,
+                    onValueChange = { time = it },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    label = { Text("Speed: $time") }
+                )
+            }
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
-        item {
-            OutlinedTextField(
-                value = stiffValue,
-                onValueChange = { stiffValue = it },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                label = { Text("Stiff (0-10_000): $stiffValue") }
-            )
-        }
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-        item {
-            OutlinedTextField(
-                value = dumpValue,
-                onValueChange = { dumpValue = it },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                label = { Text("Dump (0-1f): $dumpValue") }
-            )
-        }
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-        item {
-            FlowColumn(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                TextCheckBox("fastOutSlowInEasing", fastOutSlowInEasing) {
-                    fastOutSlowInEasing = !fastOutSlowInEasing
-                }
-                TextCheckBox("linearOutSlowInEasing", linearOutSlowInEasing) {
-                    linearOutSlowInEasing = !linearOutSlowInEasing
-                }
-                TextCheckBox("fastOutLinearInEasing", fastOutLinearInEasing) {
-                    fastOutLinearInEasing = !fastOutLinearInEasing
-                }
-                TextCheckBox("stiffnessLow", stiffnessLow) {
-                    stiffnessLow = !stiffnessLow
-                }
+            item {
+                OutlinedTextField(
+                    value = stiffValue,
+                    onValueChange = { stiffValue = it },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    label = { Text("Stiff (0-10_000): $stiffValue") }
+                )
             }
-        }
-        item {
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-        item {
-            Button({
-                expanded = !expanded
-            }) {
-                Text("Change Invisible now: $height")
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            item {
+                OutlinedTextField(
+                    value = dumpValue,
+                    onValueChange = { dumpValue = it },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    label = { Text("Dump (0-1f): $dumpValue") }
+                )
+            }
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            item {
+                FlowColumn(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TextCheckBox("fastOutSlowInEasing", fastOutSlowInEasing) {
+                        fastOutSlowInEasing = !fastOutSlowInEasing
+                    }
+                    TextCheckBox("linearOutSlowInEasing", linearOutSlowInEasing) {
+                        linearOutSlowInEasing = !linearOutSlowInEasing
+                    }
+                    TextCheckBox("fastOutLinearInEasing", fastOutLinearInEasing) {
+                        fastOutLinearInEasing = !fastOutLinearInEasing
+                    }
+                    TextCheckBox("stiffnessLow", stiffnessLow) {
+                        stiffnessLow = !stiffnessLow
+                    }
+                }
             }
         }
     }
