@@ -84,8 +84,6 @@ fun DisplaySwipeHeightSample() {
                     return Offset.Zero
                 }
 
-
-
                 return available
             }
         }
