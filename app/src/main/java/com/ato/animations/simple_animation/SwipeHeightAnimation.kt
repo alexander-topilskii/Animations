@@ -1,26 +1,16 @@
 package com.ato.animations.simple_animation
 
 import android.content.res.Configuration
-import androidx.compose.animation.core.FastOutLinearInEasing
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowColumn
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -155,45 +145,6 @@ fun DisplaySwipeHeightSample() {
 }
 
 @Composable
-private fun getAnimation(
-    fastOutSlowInEasing: Boolean,
-    time: String,
-    linearOutSlowInEasing: Boolean,
-    fastOutLinearInEasing: Boolean,
-    stiffnessLow: Boolean,
-    dumpValue: String,
-    stiffValue: String
-): FiniteAnimationSpec<Dp> {
-    val animationSpec = when {
-        fastOutSlowInEasing -> tween(
-            durationMillis = time.toIntOrNull() ?: 500,
-            easing = FastOutSlowInEasing
-        )
-
-        linearOutSlowInEasing -> tween(
-            durationMillis = time.toIntOrNull() ?: 500,
-            easing = LinearOutSlowInEasing
-        )
-
-        fastOutLinearInEasing -> tween(
-            durationMillis = time.toIntOrNull() ?: 500,
-            easing = FastOutLinearInEasing
-        )
-
-        stiffnessLow -> spring<Dp>(
-            dampingRatio = dumpValue.toFloatOrNull() ?: 0.5f,
-            stiffness = stiffValue.toFloatOrNull() ?: 50f
-        )
-
-        else -> tween(
-            durationMillis = time.toIntOrNull() ?: 500,
-            easing = LinearEasing
-        )
-    }
-    return animationSpec
-}
-
-@Composable
 private fun MainBox(
     animatedHeight: Dp
 ) {
@@ -208,36 +159,5 @@ private fun MainBox(
                 .fillMaxWidth()
                 .background(Color.Blue)
         )
-    }
-}
-
-@Composable
-@OptIn(ExperimentalLayoutApi::class)
-private fun CheckBoxes(
-    fastOutSlowInEasing: Boolean,
-    linearOutSlowInEasing: Boolean,
-    fastOutLinearInEasing: Boolean,
-    stiffnessLow: Boolean
-) {
-    var fastOutSlowInEasing1 = fastOutSlowInEasing
-    var linearOutSlowInEasing1 = linearOutSlowInEasing
-    var fastOutLinearInEasing1 = fastOutLinearInEasing
-    var stiffnessLow1 = stiffnessLow
-    FlowColumn(
-        modifier = Modifier.padding(horizontal = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        TextCheckBox("fastOutSlowInEasing", fastOutSlowInEasing1) {
-            fastOutSlowInEasing1 = !fastOutSlowInEasing1
-        }
-        TextCheckBox("linearOutSlowInEasing", linearOutSlowInEasing1) {
-            linearOutSlowInEasing1 = !linearOutSlowInEasing1
-        }
-        TextCheckBox("fastOutLinearInEasing", fastOutLinearInEasing1) {
-            fastOutLinearInEasing1 = !fastOutLinearInEasing1
-        }
-        TextCheckBox("stiffnessLow", stiffnessLow1) {
-            stiffnessLow1 = !stiffnessLow1
-        }
     }
 }
