@@ -34,6 +34,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.math.abs
 
 @Composable
 @Preview(name = "Light Mode", showBackground = true)
@@ -46,14 +47,18 @@ fun PreviewSwipeHeightSample() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DisplaySwipeHeightSample() {
-    var boxHeight by remember { mutableStateOf(100.dp) }
+    val minHeight = 48.dp
+    val middleHeight = 100.dp
+    val maxHeight = 200.dp
+
+    var boxHeight by remember { mutableStateOf(middleHeight) }
     var stiffValue by remember { mutableStateOf("50") }
-    var dumpValue by remember { mutableStateOf("0.5") }
+    var dumpValue by remember { mutableStateOf("0.9") }
 
     val listState = rememberLazyListState()
 
     val animationSpec = spring<Dp>(
-        dampingRatio = dumpValue.toFloatOrNull() ?: 0.5f,
+        dampingRatio = dumpValue.toFloatOrNull() ?: 0.1f,
         stiffness = stiffValue.toFloatOrNull() ?: 50f
     )
     val animatedHeight: Dp by animateDpAsState(
@@ -69,14 +74,14 @@ fun DisplaySwipeHeightSample() {
 
                 if (listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0) {
 
-                    boxHeight += if (dragAmount < 0) -10.dp else 10.dp
-                    if (boxHeight < 50.dp) {
-                        boxHeight = 50.dp
+                    boxHeight += if (dragAmount < 0) -abs(dragAmount).dp else abs(dragAmount).dp
+                    if (boxHeight < minHeight) {
+                        boxHeight = minHeight
 
                         return available.copy(y = 0f)
                     }
-                    if (boxHeight > 500.dp) {
-                        boxHeight = 500.dp
+                    if (boxHeight > maxHeight) {
+                        boxHeight = maxHeight
 
                         return available.copy(y = 0f)
                     }
@@ -105,12 +110,10 @@ fun DisplaySwipeHeightSample() {
             item {
                 Spacer(modifier = Modifier.height(8.dp))
             }
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-            }
 
             item {
                 OutlinedTextField(
+                    modifier = Modifier.padding(16.dp),
                     value = stiffValue,
                     onValueChange = { stiffValue = it },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -122,6 +125,7 @@ fun DisplaySwipeHeightSample() {
             }
             item {
                 OutlinedTextField(
+                    modifier = Modifier.padding(16.dp),
                     value = dumpValue,
                     onValueChange = { dumpValue = it },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
