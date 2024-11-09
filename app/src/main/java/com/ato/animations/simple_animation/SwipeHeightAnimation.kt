@@ -48,10 +48,10 @@ fun PreviewSwipeHeightSample() {
 @Composable
 fun DisplaySwipeHeightSample() {
     val minHeight = 48.dp
-    val middleHeight = 100.dp
+    val mediumHeight = 100.dp
     val maxHeight = 200.dp
 
-    var boxHeight by remember { mutableStateOf(middleHeight) }
+    var boxHeight by remember { mutableStateOf(mediumHeight) }
     var stiffValue by remember { mutableStateOf("50") }
     var dumpValue by remember { mutableStateOf("0.9") }
 
@@ -75,15 +75,43 @@ fun DisplaySwipeHeightSample() {
                 if (listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0) {
 
                     boxHeight += if (dragAmount < 0) -abs(dragAmount).dp else abs(dragAmount).dp
-                    if (boxHeight < minHeight) {
-                        boxHeight = minHeight
 
-                        return available.copy(y = 0f)
-                    }
-                    if (boxHeight > maxHeight) {
-                        boxHeight = maxHeight
+                    when {
+                        boxHeight < minHeight -> {
+                            boxHeight = minHeight
 
-                        return available.copy(y = 0f)
+                            return available.copy(y = 0f)
+                        }
+
+                        boxHeight > minHeight && boxHeight < mediumHeight && dragAmount < 0 -> {
+                            boxHeight = minHeight
+
+                            return available.copy(y = dragAmount)
+                        }
+
+                        boxHeight > minHeight && boxHeight < mediumHeight && dragAmount > 0 -> {
+                            boxHeight = mediumHeight
+
+                            return available.copy(y = dragAmount)
+                        }
+
+                        boxHeight > mediumHeight && boxHeight < maxHeight && dragAmount < 0 -> {
+                            boxHeight = mediumHeight
+
+                            return available.copy(y = dragAmount)
+                        }
+
+                        boxHeight > mediumHeight && boxHeight < maxHeight && dragAmount > 0 -> {
+                            boxHeight = maxHeight
+
+                            return available.copy(y = dragAmount)
+                        }
+
+                        boxHeight > maxHeight -> {
+                            boxHeight = maxHeight
+
+                            return available.copy(y = 0f)
+                        }
                     }
                 } else {
                     return Offset.Zero
