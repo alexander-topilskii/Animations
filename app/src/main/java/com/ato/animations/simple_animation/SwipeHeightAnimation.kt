@@ -1,8 +1,11 @@
 package com.ato.animations.simple_animation
 
 import android.content.res.Configuration
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -33,6 +36,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 
@@ -54,70 +58,104 @@ fun DisplaySwipeHeightSample() {
     var boxHeight by remember { mutableStateOf(mediumHeight) }
     var stiffValue by remember { mutableStateOf("50") }
     var dumpValue by remember { mutableStateOf("0.9") }
+    var currentStep by remember { mutableStateOf(CurrentStep.MEDIUM) }
 
     val listState = rememberLazyListState()
 
     val animationSpec = spring<Dp>(
-        dampingRatio = dumpValue.toFloatOrNull() ?: 0.1f,
-        stiffness = stiffValue.toFloatOrNull() ?: 50f
+        dampingRatio = dumpValue.toFloatOrNull() ?: 0.9f,
+        stiffness = stiffValue.toFloatOrNull() ?: 500f
     )
+    val tween = tween<Dp>(
+        durationMillis = 300,
+        easing = FastOutLinearInEasing
+    )
+
     val animatedHeight: Dp by animateDpAsState(
         targetValue = boxHeight,
-        animationSpec = animationSpec,
-        label = "height animation"
+        animationSpec = tween,
+        label = "height animation",
     )
 
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
+
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 val dragAmount = available.y
 
                 if (listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0) {
-
-                    boxHeight += if (dragAmount < 0) -abs(dragAmount).dp else abs(dragAmount).dp
+                    val nextTarget = boxHeight + dragAmount.dp
 
                     when {
-                        boxHeight < minHeight -> {
-                            boxHeight = minHeight
-
-                            return available.copy(y = 0f)
-                        }
-
-                        boxHeight > minHeight && boxHeight < mediumHeight && dragAmount < 0 -> {
-                            boxHeight = minHeight
-
-                            return available.copy(y = dragAmount)
-                        }
-
-                        boxHeight > minHeight && boxHeight < mediumHeight && dragAmount > 0 -> {
+                        // Если куда мы направляемся больше медиума но мы сейчас движемся из позиции Min
+                        nextTarget > mediumHeight && currentStep == CurrentStep.MIN -> {
                             boxHeight = mediumHeight
 
                             return available.copy(y = dragAmount)
                         }
 
-                        boxHeight > mediumHeight && boxHeight < maxHeight && dragAmount < 0 -> {
-                            boxHeight = mediumHeight
-
+                        currentStep == CurrentStep.MAX -> {
+                            boxHeight = minHeight
                             return available.copy(y = dragAmount)
                         }
 
-                        boxHeight > mediumHeight && boxHeight < maxHeight && dragAmount > 0 -> {
-                            boxHeight = maxHeight
-
-                            return available.copy(y = dragAmount)
-                        }
-
-                        boxHeight > maxHeight -> {
-                            boxHeight = maxHeight
-
+                        nextTarget < minHeight -> {
+                            boxHeight = minHeight
                             return available.copy(y = 0f)
+                        }
+
+                        nextTarget > maxHeight -> {
+                            boxHeight = maxHeight
+                            return available.copy(y = 0f)
+                        }
+
+
+                        else -> {
+                            boxHeight = nextTarget
+                            return available.copy(y = dragAmount)
                         }
                     }
                 } else {
                     return Offset.Zero
                 }
+            }
 
-                return available
+            override suspend fun onPreFling(available: Velocity): Velocity {
+                if (animatedHeight != boxHeight) {
+                    // останавливаем Fling если человек бесконечно скроллит
+                    return available
+                }
+                return super.onPreFling(available)
+            }
+
+            override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+                val distanceToMax = abs(boxHeight.value - maxHeight.value)
+                val distanceToMedium = abs(boxHeight.value - mediumHeight.value)
+                val distanceToMin = abs(boxHeight.value - minHeight.value)
+
+                val epsilon = 1e-6f
+                when {
+                    abs(
+                        distanceToMin - minOf(distanceToMin, distanceToMedium, distanceToMax)
+                    ) < epsilon -> {
+                        boxHeight = minHeight
+                        currentStep = CurrentStep.MIN
+                    }
+
+                    abs(
+                        distanceToMedium - minOf(distanceToMin, distanceToMedium, distanceToMax)
+                    ) < epsilon -> {
+                        boxHeight = mediumHeight
+                        currentStep = CurrentStep.MEDIUM
+                    }
+
+                    else -> {
+                        boxHeight = maxHeight
+                        currentStep = CurrentStep.MAX
+                    }
+                }
+
+                return super.onPostFling(consumed, available)
             }
         }
     }
@@ -174,6 +212,10 @@ fun DisplaySwipeHeightSample() {
     }
 }
 
+enum class CurrentStep {
+    MIN, MEDIUM, MAX
+}
+
 @Composable
 private fun MainBox(
     animatedHeight: Dp
@@ -189,5 +231,6 @@ private fun MainBox(
                 .fillMaxWidth()
                 .background(Color.Blue)
         )
+        Text("$animatedHeight")
     }
 }
