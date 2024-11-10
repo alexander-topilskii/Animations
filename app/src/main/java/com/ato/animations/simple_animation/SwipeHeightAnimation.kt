@@ -104,6 +104,27 @@ fun DisplaySwipeHeightSample(
     }
 }
 
+
+@Composable
+private fun MainBox(
+    animatedHeight: Dp
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .height(animatedHeight)
+                .fillMaxWidth()
+                .background(Color.Blue)
+        )
+        Text("$animatedHeight")
+    }
+}
+
+
 class NestedScrollAnimation(
     private val listState: LazyListState,
     private val onTargetHeightChanged: (Dp) -> Unit,
@@ -112,7 +133,7 @@ class NestedScrollAnimation(
     private val maxHeight: Dp = 200.dp,
 ) : NestedScrollConnection {
 
-     var animatedHeight: Dp = mediumHeight
+    var animatedHeight: Dp = mediumHeight
 
     private var targetHeight = mediumHeight
         set(value) {
@@ -220,23 +241,4 @@ class NestedScrollAnimation(
 
 enum class CurrentStep {
     MIN, MEDIUM, MAX
-}
-
-@Composable
-private fun MainBox(
-    animatedHeight: Dp
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .height(animatedHeight)
-                .fillMaxWidth()
-                .background(Color.Blue)
-        )
-        Text("$animatedHeight")
-    }
 }
