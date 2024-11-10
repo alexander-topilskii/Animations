@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -32,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.Layout
@@ -79,6 +81,12 @@ fun DisplayCustomLayoutSample(
         label = "height animation",
     )
 
+    val linearAnimatedHeight: Dp by animateDpAsState(
+        targetValue = targetHeight,
+        animationSpec = tween(),
+        label = "height animation",
+    )
+
     nestedScrollConnection.animatedHeight = animatedHeight
 
     Box(
@@ -95,7 +103,7 @@ fun DisplayCustomLayoutSample(
                 MainBox(
                     height = animatedHeight,
                     progress = calculateProgress(
-                        currentValue = animatedHeight,
+                        currentValue = linearAnimatedHeight,
                         min = minHeight,
                         mid = mediumHeight,
                         max = maxHeight
@@ -130,7 +138,7 @@ private fun MainBox(
             .fillMaxWidth()
             .background(Color.Blue)
     ) {
-        Text("kek1")
+        Text("kek1", modifier = Modifier.alpha(1f - progress))
         Text("kek2")
     }
 }
